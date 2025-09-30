@@ -1,0 +1,5 @@
+{
+  "name": "AI Food Diary",
+  "description": "An intelligent food diary that allows users to log daily meals and physical activities, providing detailed nutritional analysis and periodic reports (weekly, monthly, annual) powered by AI.",
+  "requestFramePermissions": []
+}
