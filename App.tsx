@@ -39,17 +39,11 @@ const Header: React.FC<{
     return (
         <header className="bg-white shadow-sm rounded-xl p-4 mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-                    Diario Alimentare AI
-                </h1>
-                <div className="flex items-center gap-2">
-                    <nav className="flex items-center bg-gray-100 p-1 rounded-lg space-x-1">
-                        <NavButton mode="daily" currentViewMode={viewMode} setViewMode={setViewMode}>Giornaliero</NavButton>
-                        <NavButton mode="weekly" currentViewMode={viewMode} setViewMode={setViewMode}>Settimanale</NavButton>
-                        <NavButton mode="monthly" currentViewMode={viewMode} setViewMode={setViewMode}>Mensile</NavButton>
-                        <NavButton mode="annual" currentViewMode={viewMode} setViewMode={setViewMode}>Annuale</NavButton>
-                    </nav>
-                     <button
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                        Diario Alimentare AI
+                    </h1>
+                    <button
                         onClick={onProfileClick}
                         className="p-2 rounded-full text-gray-600 hover:bg-indigo-100 transition-colors"
                         aria-label="Apri profilo utente"
@@ -57,6 +51,12 @@ const Header: React.FC<{
                         <UserIcon className="w-6 h-6" />
                     </button>
                 </div>
+                <nav className="flex items-center bg-gray-100 p-1 rounded-lg space-x-1">
+                    <NavButton mode="daily" currentViewMode={viewMode} setViewMode={setViewMode}>Giornaliero</NavButton>
+                    <NavButton mode="weekly" currentViewMode={viewMode} setViewMode={setViewMode}>Settimanale</NavButton>
+                    <NavButton mode="monthly" currentViewMode={viewMode} setViewMode={setViewMode}>Mensile</NavButton>
+                    <NavButton mode="annual" currentViewMode={viewMode} setViewMode={setViewMode}>Annuale</NavButton>
+                </nav>
             </div>
         </header>
     );
