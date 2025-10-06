@@ -1,7 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { DailyEntry, UserProfile } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+// Fix: Removed `as string` to align with @google/genai coding guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const dailyAnalysisSchema = {
   type: Type.OBJECT,

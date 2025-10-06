@@ -31,14 +31,26 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isDirtyRef = useRef(false);
+  // Fix: Initialize useRef with an explicit undefined value to resolve the "Expected 1 arguments, but got 0" error.
+  const previousDateRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    // Se la data è cambiata, siamo in un nuovo giorno.
+    // Resettiamo lo stato transiente come l'analisi.
+    if (previousDateRef.current !== date) {
+      setAnalysis(undefined);
+      setError(null);
+    }
+    
+    // Sincronizziamo sempre lo stato persistente dalla prop 'entry'.
+    // Questo gestisce sia il caricamento per un nuovo giorno sia l'aggiornamento dopo un salvataggio.
     setMeals(entry?.meals || '');
     setActivity(entry?.activity || '');
-    setAnalysis(entry?.analysis);
     setIsNonWorkingDay(entry?.isNonWorkingDay || false);
-    setError(null);
-  }, [entry]);
+
+    // Aggiorniamo il riferimento alla data corrente per il prossimo render.
+    previousDateRef.current = date;
+  }, [entry, date]);
 
   useEffect(() => {
     const hasChanges =
@@ -57,9 +69,16 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
     setError(null);
     try {
       const currentEntryData: DailyEntry = { date, meals, activity, isNonWorkingDay };
+      
+      // 1. Salva i dati persistenti. Questo aggiorna anche lo stato dirty.
+      onSave(currentEntryData);
+      
+      // 2. Esegui l'analisi sui dati appena salvati.
       const result = await analyzeDailyMeals(currentEntryData, userProfile);
+      
+      // 3. Aggiorna lo stato locale e transiente per visualizzare l'analisi.
       setAnalysis(result);
-      onSave({ ...currentEntryData, analysis: result });
+
     } catch (e: any) {
       setError(e.message || "Si è verificato un errore sconosciuto.");
     } finally {
@@ -68,7 +87,8 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
   }, [meals, activity, date, onSave, userProfile, isNonWorkingDay]);
 
   const handleSave = () => {
-    onSave({ date, meals, activity, analysis, isNonWorkingDay });
+    // Quando si salva, non includiamo l'analisi.
+    onSave({ date, meals, activity, isNonWorkingDay });
   };
 
   const handleExport = () => {

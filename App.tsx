@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import useLocalStorage from './hooks/useLocalStorage';
 import DateNavigator from './components/DateNavigator';
 import DailyLog from './components/DailyLog';
 import AnalysisView from './components/AnalysisView';
 import UserProfileModal from './components/UserProfileModal';
 import { UserIcon } from './components/IconComponents';
 import type { DailyEntry, ViewMode, UserProfile } from './types';
+import useLocalStorage from './hooks/useLocalStorage';
 
 const formatDate = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
-
-const useUserProfile = () => useLocalStorage<UserProfile>('food-diary-user-profile', {});
 
 const NavButton: React.FC<{
     mode: ViewMode;
@@ -31,6 +29,7 @@ const NavButton: React.FC<{
     </button>
 );
 
+
 const Header: React.FC<{ 
     viewMode: ViewMode, 
     setViewMode: (mode: ViewMode) => void,
@@ -39,16 +38,16 @@ const Header: React.FC<{
     return (
         <header className="bg-white shadow-sm rounded-xl p-4 mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
                         Diario Alimentare AI
                     </h1>
-                    <button
-                        onClick={onProfileClick}
-                        className="p-2 rounded-full text-gray-600 hover:bg-indigo-100 transition-colors"
+                     <button 
+                        onClick={onProfileClick} 
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                         aria-label="Apri profilo utente"
                     >
-                        <UserIcon className="w-6 h-6" />
+                        <UserIcon />
                     </button>
                 </div>
                 <nav className="flex items-center bg-gray-100 p-1 rounded-lg space-x-1">
@@ -62,11 +61,13 @@ const Header: React.FC<{
     );
 };
 
+
 function App() {
   const [entries, setEntries] = useLocalStorage<DailyEntry[]>('food-diary-entries', []);
+  const [userProfile, setUserProfile] = useLocalStorage<UserProfile>('food-diary-profile', {});
+  
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
-  const [userProfile, setUserProfile] = useUserProfile();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -74,39 +75,52 @@ function App() {
   const currentEntry = entries.find(entry => entry.date === formattedDate);
 
   const handleSaveEntry = (entryToSave: DailyEntry) => {
-    const newEntries = entries.filter(e => e.date !== entryToSave.date);
-    setEntries([...newEntries, entryToSave].sort((a,b) => a.date.localeCompare(b.date)));
+    // In accordo con il nuovo approccio, l'analisi viene rimossa prima del salvataggio.
+    // Questo previene problemi di persistenza e risolve il bug della cancellazione.
+    const { analysis, ...entryForStorage } = entryToSave;
+
+    setEntries(prevEntries => {
+      let entryFound = false;
+      const newEntries = prevEntries.map(entry => {
+        if (entry.date === entryForStorage.date) {
+          entryFound = true;
+          return entryForStorage; // Sostituisci con la nuova registrazione (senza analisi)
+        }
+        return entry;
+      });
+
+      if (!entryFound) {
+        newEntries.push(entryForStorage);
+      }
+
+      return newEntries.sort((a, b) => a.date.localeCompare(b.date));
+    });
+    setIsDirty(false);
+  };
+
+  const handleSaveProfile = (profileToSave: UserProfile) => {
+    setUserProfile(profileToSave);
   };
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isDirty) {
         event.preventDefault();
-        event.returnValue = ''; // Required for cross-browser compatibility
+        event.returnValue = '';
       }
     };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
 
   const handleSetViewMode = (mode: ViewMode) => {
     if (viewMode === mode) return;
-
     const navigate = () => {
         setViewMode(mode);
-        if (mode !== 'daily') {
-            setIsDirty(false);
-        }
+        if (mode !== 'daily') setIsDirty(false);
     };
-
     if (isDirty && viewMode === 'daily') {
-        if (window.confirm("Hai delle modifiche non salvate. Sei sicuro di voler cambiare vista? Le modifiche andranno perse.")) {
-            navigate();
-        }
+        if (window.confirm("Hai delle modifiche non salvate. Sei sicuro di voler cambiare vista? Le modifiche andranno perse.")) navigate();
     } else {
         navigate();
     }
@@ -115,6 +129,7 @@ function App() {
   const handleSetCurrentDate = (date: Date) => {
     if (isDirty && viewMode === 'daily') {
          if (window.confirm("Hai delle modifiche non salvate. Sei sicuro di voler cambiare data? Le modifiche andranno perse.")) {
+             setIsDirty(false);
              setCurrentDate(date);
          }
     } else {
@@ -134,7 +149,7 @@ function App() {
         {isProfileModalOpen && (
             <UserProfileModal
                 profile={userProfile}
-                onSave={setUserProfile}
+                onSave={handleSaveProfile}
                 onClose={() => setIsProfileModalOpen(false)}
             />
         )}
