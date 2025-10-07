@@ -64,6 +64,15 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
     }
   }, [meals, activity, isNonWorkingDay, entry, onDirtyStateChange]);
 
+  useEffect(() => {
+    if (analysis) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [analysis]);
+
   const handleAnalyze = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -127,6 +136,53 @@ ${analysis.micronutrients && analysis.micronutrients.length > 0 ? analysis.micro
 
   return (
     <div className="space-y-6">
+      {analysis && !isLoading && (
+        <Card 
+            title="Analisi Nutrizionale AI"
+            actions={
+              <button 
+                  onClick={handleExport}
+                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+                  title="Esporta Analisi"
+                  aria-label="Esporta Analisi"
+              >
+                  <FileTextIcon className="w-5 h-5" />
+              </button>
+            }
+        >
+          <p className="text-gray-700 mb-4">{analysis.summary}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
+            <div className="bg-indigo-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Calorie</p>
+              <p className="text-2xl font-bold text-indigo-700">{analysis.calories.toFixed(0)}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Proteine</p>
+              <p className="text-2xl font-bold text-green-700">{analysis.protein.toFixed(1)}g</p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Carboidrati</p>
+              <p className="text-2xl font-bold text-yellow-700">{analysis.carbs.toFixed(1)}g</p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Grassi</p>
+              <p className="text-2xl font-bold text-red-700">{analysis.fats.toFixed(1)}g</p>
+            </div>
+          </div>
+          <NutrientChart analysis={analysis} />
+          {analysis.micronutrients && analysis.micronutrients.length > 0 && (
+            <div className="mt-6">
+                <h4 className="font-semibold text-gray-700 mb-2">Micronutrienti chiave:</h4>
+                <div className="flex flex-wrap gap-2">
+                {analysis.micronutrients.map((nutrient, index) => (
+                    <span key={index} className="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">{nutrient}</span>
+                ))}
+                </div>
+            </div>
+          )}
+        </Card>
+      )}
+      
       <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
           <div className="flex items-center gap-3">
             <input
@@ -188,52 +244,6 @@ ${analysis.micronutrients && analysis.micronutrients.length > 0 ? analysis.micro
       {isLoading && <LoadingSpinner />}
       {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative" role="alert">{error}</div>}
 
-      {analysis && !isLoading && (
-        <Card 
-            title="Analisi Nutrizionale AI"
-            actions={
-              <button 
-                  onClick={handleExport}
-                  className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-                  title="Esporta Analisi"
-                  aria-label="Esporta Analisi"
-              >
-                  <FileTextIcon className="w-5 h-5" />
-              </button>
-            }
-        >
-          <p className="text-gray-700 mb-4">{analysis.summary}</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
-            <div className="bg-indigo-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Calorie</p>
-              <p className="text-2xl font-bold text-indigo-700">{analysis.calories.toFixed(0)}</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Proteine</p>
-              <p className="text-2xl font-bold text-green-700">{analysis.protein.toFixed(1)}g</p>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Carboidrati</p>
-              <p className="text-2xl font-bold text-yellow-700">{analysis.carbs.toFixed(1)}g</p>
-            </div>
-            <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600">Grassi</p>
-              <p className="text-2xl font-bold text-red-700">{analysis.fats.toFixed(1)}g</p>
-            </div>
-          </div>
-          <NutrientChart analysis={analysis} />
-          {analysis.micronutrients && analysis.micronutrients.length > 0 && (
-            <div className="mt-6">
-                <h4 className="font-semibold text-gray-700 mb-2">Micronutrienti chiave:</h4>
-                <div className="flex flex-wrap gap-2">
-                {analysis.micronutrients.map((nutrient, index) => (
-                    <span key={index} className="bg-gray-200 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">{nutrient}</span>
-                ))}
-                </div>
-            </div>
-          )}
-        </Card>
-      )}
     </div>
   );
 };
