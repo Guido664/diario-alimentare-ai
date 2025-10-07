@@ -147,7 +147,7 @@ ${analysis.micronutrients && analysis.micronutrients.length > 0 ? analysis.micro
           value={meals}
           onChange={(e) => setMeals(e.target.value)}
           placeholder="Es: Colazione: yogurt greco e frutta. Pranzo: riso con pollo e verdure..."
-          className="w-full h-15 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+          className="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
         />
       </Card>
 
