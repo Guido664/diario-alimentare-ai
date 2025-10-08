@@ -1,14 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import type { UserProfile } from '../types';
+import { TrashIcon } from './IconComponents';
 
 interface UserProfileModalProps {
   profile: UserProfile;
   onSave: (profile: UserProfile) => void;
   onClose: () => void;
+  onDeleteAllData: () => void;
 }
 
-const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, onClose }) => {
+const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, onClose, onDeleteAllData }) => {
     const [formData, setFormData] = useState<UserProfile>(profile);
 
     useEffect(() => {
@@ -32,6 +34,13 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, on
         e.preventDefault();
         onSave(formData);
         onClose();
+    };
+
+    const handleDelete = () => {
+        if (window.confirm("Sei assolutamente sicuro di voler cancellare tutti i tuoi dati? Questa azione è irreversibile e rimuoverà il tuo profilo e tutte le registrazioni giornaliere.")) {
+            onDeleteAllData();
+            onClose();
+        }
     };
 
   return (
@@ -118,6 +127,22 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, on
                                 </div>
                             </div>
                         </div>
+
+                        <div className="border-t mt-8 pt-6">
+                            <h3 className="text-lg font-semibold text-red-700 mb-2">Zona Pericolosa</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                L'azione seguente cancellerà in modo permanente tutti i dati dell'applicazione, inclusi il profilo utente e tutte le registrazioni giornaliere. Non potrà essere annullata.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            >
+                                <TrashIcon className="w-5 h-5 mr-2" />
+                                Cancella Tutti i Dati
+                            </button>
+                        </div>
+
                     </div>
                     <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
                         <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
