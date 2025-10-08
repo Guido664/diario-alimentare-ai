@@ -102,6 +102,11 @@ function App() {
     setUserProfile(profileToSave);
   };
 
+  const handleDeleteAllData = () => {
+    setEntries([]);
+    setUserProfile({});
+  };
+
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (isDirty) {
@@ -151,6 +156,7 @@ function App() {
                 profile={userProfile}
                 onSave={handleSaveProfile}
                 onClose={() => setIsProfileModalOpen(false)}
+                onDeleteAllData={handleDeleteAllData}
             />
         )}
 
