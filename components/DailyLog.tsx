@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { DailyEntry, NutrientAnalysis, UserProfile } from '../types';
 import { analyzeDailyMeals } from '../services/geminiService';
