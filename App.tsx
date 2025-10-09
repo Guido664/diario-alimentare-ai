@@ -3,7 +3,8 @@ import DateNavigator from './components/DateNavigator';
 import DailyLog from './components/DailyLog';
 import AnalysisView from './components/AnalysisView';
 import UserProfileModal from './components/UserProfileModal';
-import { UserIcon } from './components/IconComponents';
+import ExportModal from './components/ExportModal';
+import { UserIcon, ArrowDownTrayIcon } from './components/IconComponents';
 import type { DailyEntry, ViewMode, UserProfile } from './types';
 import useLocalStorage from './hooks/useLocalStorage';
 
@@ -34,11 +35,12 @@ const Header: React.FC<{
     viewMode: ViewMode, 
     setViewMode: (mode: ViewMode) => void,
     onProfileClick: () => void,
-}> = ({ viewMode, setViewMode, onProfileClick }) => {
+    onExportClick: () => void,
+}> = ({ viewMode, setViewMode, onProfileClick, onExportClick }) => {
     return (
         <header className="bg-white shadow-sm rounded-xl p-4 mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
                         Diario Alimentare AI
                     </h1>
@@ -48,6 +50,13 @@ const Header: React.FC<{
                         aria-label="Apri profilo utente"
                     >
                         <UserIcon />
+                    </button>
+                    <button 
+                        onClick={onExportClick} 
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        aria-label="Esporta diario"
+                    >
+                        <ArrowDownTrayIcon />
                     </button>
                 </div>
                 <nav className="flex items-center bg-gray-100 p-1 rounded-lg space-x-1">
@@ -69,6 +78,7 @@ function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
   const formattedDate = formatDate(currentDate);
@@ -149,6 +159,7 @@ function App() {
             viewMode={viewMode} 
             setViewMode={handleSetViewMode} 
             onProfileClick={() => setIsProfileModalOpen(true)}
+            onExportClick={() => setIsExportModalOpen(true)}
         />
 
         {isProfileModalOpen && (
@@ -157,6 +168,15 @@ function App() {
                 onSave={handleSaveProfile}
                 onClose={() => setIsProfileModalOpen(false)}
                 onDeleteAllData={handleDeleteAllData}
+            />
+        )}
+
+        {isExportModalOpen && (
+            <ExportModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                entries={entries}
+                userProfile={userProfile}
             />
         )}
 
