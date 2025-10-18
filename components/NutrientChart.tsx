@@ -9,9 +9,9 @@ interface NutrientChartProps {
 
 const NutrientChart: React.FC<NutrientChartProps> = ({ analysis }) => {
   const data = [
-    { name: 'Proteine (g)', value: analysis.protein, fill: '#8884d8' },
-    { name: 'Carboidrati (g)', value: analysis.carbs, fill: '#82ca9d' },
-    { name: 'Grassi (g)', value: analysis.fats, fill: '#ffc658' },
+    { name: 'Proteine (g)', value: analysis.protein, fill: '#f0fdf4' },
+    { name: 'Carboidrati (g)', value: analysis.carbs, fill: '#fefce8' },
+    { name: 'Grassi (g)', value: analysis.fats, fill: '#fef2f2' },
   ];
 
   return (
