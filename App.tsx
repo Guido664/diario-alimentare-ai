@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DateNavigator from './components/DateNavigator';
 import DailyLog from './components/DailyLog';
@@ -85,22 +86,20 @@ function App() {
   const currentEntry = entries.find(entry => entry.date === formattedDate);
 
   const handleSaveEntry = (entryToSave: DailyEntry) => {
-    // In accordo con il nuovo approccio, l'analisi viene rimossa prima del salvataggio.
-    // Questo previene problemi di persistenza e risolve il bug della cancellazione.
-    const { analysis, ...entryForStorage } = entryToSave;
-
+    // L'analisi AI ora viene salvata insieme agli altri dati della giornata
+    // per poterla riutilizzare nei report periodici.
     setEntries(prevEntries => {
       let entryFound = false;
       const newEntries = prevEntries.map(entry => {
-        if (entry.date === entryForStorage.date) {
+        if (entry.date === entryToSave.date) {
           entryFound = true;
-          return entryForStorage; // Sostituisci con la nuova registrazione (senza analisi)
+          return entryToSave; // Salva la registrazione completa, con o senza analisi.
         }
         return entry;
       });
 
       if (!entryFound) {
-        newEntries.push(entryForStorage);
+        newEntries.push(entryToSave);
       }
 
       return newEntries.sort((a, b) => a.date.localeCompare(b.date));
