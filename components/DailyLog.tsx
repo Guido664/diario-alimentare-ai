@@ -36,18 +36,18 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
   const previousDateRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    // Se la data è cambiata, siamo in un nuovo giorno.
-    // Resettiamo lo stato transiente come l'analisi.
+    // Quando la data cambia, resettiamo lo stato transiente (es. errori).
     if (previousDateRef.current !== date) {
-      setAnalysis(undefined);
       setError(null);
     }
     
-    // Sincronizziamo sempre lo stato persistente dalla prop 'entry'.
-    // Questo gestisce sia il caricamento per un nuovo giorno sia l'aggiornamento dopo un salvataggio.
+    // Sincronizziamo sempre lo stato del componente con la 'entry' corrente dalle props.
+    // Questo gestisce sia il caricamento dei dati di un nuovo giorno, sia l'aggiornamento
+    // della UI dopo un salvataggio, mostrando anche l'analisi se presente.
     setMeals(entry?.meals || '');
     setActivity(entry?.activity || '');
     setIsNonWorkingDay(entry?.isNonWorkingDay || false);
+    setAnalysis(entry?.analysis); // Carica l'analisi salvata
 
     // Aggiorniamo il riferimento alla data corrente per il prossimo render.
     previousDateRef.current = date;
@@ -78,15 +78,19 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
     setIsLoading(true);
     setError(null);
     try {
+      // 1. Prepara i dati della giornata corrente.
       const currentEntryData: DailyEntry = { date, meals, activity, isNonWorkingDay };
       
-      // 1. Salva i dati persistenti. Questo aggiorna anche lo stato dirty.
-      onSave(currentEntryData);
-      
-      // 2. Esegui l'analisi sui dati appena salvati.
+      // 2. Esegui l'analisi AI per ottenere i dati nutrizionali.
       const result = await analyzeDailyMeals(currentEntryData, userProfile);
       
-      // 3. Aggiorna lo stato locale e transiente per visualizzare l'analisi.
+      // 3. Crea l'oggetto completo della registrazione, INCLUDENDO l'analisi.
+      const entryWithAnalysis = { ...currentEntryData, analysis: result };
+
+      // 4. Salva la registrazione completa (con l'analisi) nello stato globale persistente.
+      onSave(entryWithAnalysis);
+
+      // 5. Aggiorna lo stato locale del componente per visualizzare immediatamente l'analisi.
       setAnalysis(result);
 
     } catch (e: any) {
@@ -97,8 +101,8 @@ const DailyLog: React.FC<DailyLogProps> = ({ entry, date, onSave, userProfile, o
   }, [meals, activity, date, onSave, userProfile, isNonWorkingDay]);
 
   const handleSave = () => {
-    // Quando si salva, non includiamo l'analisi.
-    onSave({ date, meals, activity, isNonWorkingDay });
+    // Quando si salva, manteniamo l'analisi esistente se c'è.
+    onSave({ date, meals, activity, isNonWorkingDay, analysis });
   };
 
   const handleExport = () => {
