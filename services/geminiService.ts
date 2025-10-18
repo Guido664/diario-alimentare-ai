@@ -107,10 +107,20 @@ export const generatePeriodAnalysis = async (entries: DailyEntry[], period: 'set
 
     const aggregatedData = entries.map(entry => {
         const nonWorkingInfo = entry.isNonWorkingDay ? " (GIORNATA NON LAVORATIVA)" : "";
-        return `Data: ${entry.date}${nonWorkingInfo}\nPasti: ${entry.meals || 'Nessuno'}\nAttività fisica: ${entry.activity || 'Nessuna'}`
+        const micronutrientsInfo = entry.analysis?.micronutrients?.length
+            ? `Micronutrienti Rilevati: ${entry.analysis.micronutrients.join(', ')}`
+            : 'Micronutrienti Rilevati: Nessuna analisi AI per questo giorno.';
+        return `Data: ${entry.date}${nonWorkingInfo}\nPasti: ${entry.meals || 'Nessuno'}\nAttività fisica: ${entry.activity || 'Nessuna'}\n${micronutrientsInfo}`
     }).join('\n\n');
 
     const userProfileString = buildUserProfileString(profile);
+
+    let micronutrientInstruction = '';
+    if (period === 'mensile' || period === 'annuale') {
+        micronutrientInstruction = `
+        6.  **Bilancio dei Micronutrienti Chiave**: Basandoti sui dati dei "Micronutrienti Rilevati" giorno per giorno, crea un'analisi specifica. Valuta, in funzione del profilo utente (es. sesso, età, obiettivi), se emergono possibili carenze o eccessi ricorrenti (es. poco Ferro, troppo Sodio). Fornisci un breve paragrafo con osservazioni e consigli pratici. Se i dati sui micronutrienti sono scarsi o assenti, menzionalo e incoraggia l'utente a usare più spesso l'analisi giornaliera.
+        `;
+    }
 
     const prompt = `
         Basandomi sul seguente diario alimentare e sul profilo utente, fornisci un'analisi ${period} dettagliata, costruttiva e personalizzata in ITALIANO.
@@ -120,12 +130,13 @@ export const generatePeriodAnalysis = async (entries: DailyEntry[], period: 'set
 
         IMPORTANTE: Quando analizzi l'attività fisica, presta attenzione ai giorni segnati come "(GIORNATA NON LAVORATIVA)". In questi giorni, lo "Stile di vita lavorativo" del profilo NON si applica e il livello di attività di base è da considerarsi sedentario. L'analisi deve tenere conto di questa variabilità per valutare la coerenza complessiva dell'attività fisica rispetto agli obiettivi dell'utente.
 
-        Nel tuo report, includi:
+        Nel tuo report, includi i seguenti punti in ordine:
         1.  Un riassunto generale delle abitudini alimentari e di attività fisica (considerando la differenza tra giorni lavorativi e non) in relazione agli obiettivi.
         2.  Punti di forza (es. buon apporto proteico, costanza nell'attività fisica nei giorni di riposo).
         3.  Aree di miglioramento (es. eccesso di calorie nei weekend che rema contro la perdita di peso).
         4.  Suggerimenti pratici e personalizzati per il prossimo periodo.
         5.  Una nota incoraggiante finale che motivi l'utente a continuare.
+        ${micronutrientInstruction}
 
         Diario del periodo:
         ${aggregatedData}
@@ -140,5 +151,7 @@ export const generatePeriodAnalysis = async (entries: DailyEntry[], period: 'set
     } catch (error) {
         console.error("Error generating period analysis:", error);
         throw new Error("Impossibile generare l'analisi del periodo. Il modello AI potrebbe essere temporaneamente non disponibile.");
+    }
+};l modello AI potrebbe essere temporaneamente non disponibile.");
     }
 };
