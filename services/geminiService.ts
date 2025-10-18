@@ -152,6 +152,4 @@ export const generatePeriodAnalysis = async (entries: DailyEntry[], period: 'set
         console.error("Error generating period analysis:", error);
         throw new Error("Impossibile generare l'analisi del periodo. Il modello AI potrebbe essere temporaneamente non disponibile.");
     }
-};l modello AI potrebbe essere temporaneamente non disponibile.");
-    }
 };
