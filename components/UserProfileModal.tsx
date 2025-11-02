@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import type { UserProfile } from '../types';
-import { TrashIcon } from './IconComponents';
+import { TrashIcon, DatabaseIcon } from './IconComponents';
 
 interface UserProfileModalProps {
   profile: UserProfile;
@@ -12,10 +11,40 @@ interface UserProfileModalProps {
 
 const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, onClose, onDeleteAllData }) => {
     const [formData, setFormData] = useState<UserProfile>(profile);
+    const [storageUsage, setStorageUsage] = useState<{ usageText: string; percentage: number }>({ usageText: 'Calcolando...', percentage: 0 });
 
     useEffect(() => {
         setFormData(profile);
     }, [profile]);
+
+    useEffect(() => {
+        // This effect runs once when the modal is opened
+        const MAX_STORAGE_BYTES = 5 * 1024 * 1024; // ~5MB, a common browser limit
+
+        let totalBytes = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    totalBytes += new Blob([key, value]).size;
+                }
+            }
+        }
+        
+        let usageText: string;
+        if (totalBytes < 1024) {
+            usageText = `${totalBytes} Bytes`;
+        } else if (totalBytes < 1024 * 1024) {
+            usageText = `${(totalBytes / 1024).toFixed(2)} KB`;
+        } else {
+            usageText = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+        }
+
+        const percentage = Math.min((totalBytes / MAX_STORAGE_BYTES) * 100, 100);
+
+        setStorageUsage({ usageText, percentage });
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -137,6 +166,25 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ profile, onSave, on
                         </button>
                     </div>
                 </form>
+
+                <div className="bg-gray-50 px-6 sm:px-8 py-4 border-t">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                        <div className="flex items-center gap-3 mb-2">
+                            <DatabaseIcon className="w-5 h-5 text-gray-500" />
+                            <h4 className="font-semibold text-gray-700">Utilizzo Archiviazione</h4>
+                        </div>
+                        <div className="flex justify-between items-center text-sm mb-1">
+                            <span className="font-medium text-gray-600">Spazio occupato sul dispositivo</span>
+                            <span className="font-bold text-indigo-600">{storageUsage.usageText} / ~5 MB</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                                className="bg-indigo-600 h-2 rounded-full transition-all duration-500" 
+                                style={{ width: `${storageUsage.percentage}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="bg-red-50 p-6 sm:p-8 rounded-b-xl border-t border-red-200">
                     <h3 className="text-lg font-semibold text-red-700 mb-2">Zona Pericolosa</h3>
