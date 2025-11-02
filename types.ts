@@ -25,4 +25,13 @@ export interface DailyEntry {
   isNonWorkingDay?: boolean;
 }
 
+export interface PeriodAnalysis {
+  summary: string;
+  strengths: string;
+  improvements: string;
+  suggestions: string;
+  encouragement: string;
+  micronutrientsAnalysis?: string;
+}
+
 export type ViewMode = 'daily' | 'weekly' | 'monthly' | 'annual';
